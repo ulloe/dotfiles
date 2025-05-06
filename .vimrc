@@ -26,10 +26,13 @@ set expandtab
 syntax on
 
 " Add numbers to each line on the left-hand side.
-set number
+set number relativenumber
+highlight LineNr ctermfg=grey
 
 " Highlight cursor line underneath the cursor horizontally.
-" set cursorline
+ set cursorline
+ highlight CursorLine cterm=NONE
+ highlight CursorLineNr ctermfg=yellow cterm=NONE
 
 " Highlight cursor line underneath the cursor vertically.
 " set cursorcolumn
