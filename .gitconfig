@@ -1,0 +1,20 @@
+[user]
+    name = <username>
+    email = <email>
+[core]
+    autocrlf = true
+    editor = vim
+[push]
+    autoSetupRemote = true
+[alias]
+    permission-reset = !git diff -p -R --no-ext-diff --no-color --diff-filter=M | grep -E \"^(diff|(old|new) mode)\" --color=never | git apply
+    merge-conflicts=diff --name-only --diff-filter=U --relative
+    cherry-pluck = "!f() { \
+        if [ \"$1\" != \"--from\" ] || [ -z \"$2\" ] || [ -z \"$3\" ]; then \
+            echo \"usage: git cherry-pluck --from <repo-path> <commit-sha>\" >&2; \
+            return 1; \
+        fi; \
+        repo=\"$2\"; \
+        commit=\"$3\"; \
+        git --git-dir=\"$repo/.git\" format-patch -k -1 --stdout \"$commit\" | git am -3 -k; \
+    }; f"
