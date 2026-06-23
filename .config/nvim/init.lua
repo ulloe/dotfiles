@@ -86,6 +86,8 @@ require("bufferline").setup({
     show_buffer_icons = false,         -- keine Dateityp-Icons
     show_buffer_close_icons = false,   -- keine Schließen-Glyphe pro Reiter
     show_close_icon = false,           -- keine globale Schließen-Glyphe
+    left_trunc_marker = "...",    -- "mehr Tabs links"
+    right_trunc_marker = "...",   -- "mehr Tabs rechts"
     separator_style = { "|", "|" },    -- ASCII-Trenner statt Glyphen
     indicator = {
       style = "underline",             -- aktiver Reiter unterstrichen statt Glyphe
@@ -121,7 +123,18 @@ vim.keymap.set("n", "<leader>fn", function()
     hidden = true,
   })
 end, { desc = "Find files under tree node" })
-vim.keymap.set("n", "<leader>fg", builtin.live_grep,   { desc = "Grep" })
+vim.keymap.set("n", "<leader>fg", function()
+  local node = require("nvim-tree.api").tree.get_node_under_cursor()
+  if not node then return end
+  -- Ordner -> der Pfad selbst; Datei -> deren Elternordner
+  local path = (node.type == "directory")
+      and node.absolute_path
+      or vim.fg.fnamemodify(node.absolute_path, ":h")
+  builtin.live_grep({
+    cwd = path,
+    hidden = true,
+  })
+end, { desc = "Grep under tree node" })
 vim.keymap.set("n", "<leader>fb", builtin.buffers,     { desc = "Buffers" })
 vim.keymap.set("n", "<leader>fh", builtin.help_tags,   { desc = "Help" })
 
