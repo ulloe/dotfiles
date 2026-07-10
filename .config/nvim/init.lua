@@ -226,7 +226,24 @@ vim.api.nvim_create_autocmd("LspAttach", {
   end,
 })
 
-
+-- term process closes only buffered tab
+vim.api.nvim_create_autocmd("TermClose", {
+  callback = function(args)
+    vim.schedule(function()
+      if not vim.api.nvim_buf_is_valid(args.buf) then return end
+      -- Alle Fenster finden, die diesen Terminal-Buffer zeigen
+      local wins = vim.fn.win_findbuf(args.buf)
+      for _, win in ipairs(wins) do
+        -- in jedem solchen Fenster auf einen anderen (normalen) Buffer wechseln
+        vim.api.nvim_win_call(win, function()
+          vim.cmd("silent! bprevious")
+        end)
+      end
+      -- Terminal-Buffer entfernen
+      pcall(vim.api.nvim_buf_delete, args.buf, { force = true })
+    end)
+  end,
+})
 
 -- custom keymaps:
 
@@ -236,5 +253,14 @@ vim.keymap.set("n", "L", ":BufferLineCycleNext<CR>", { silent = true })  -- näc
 vim.keymap.set("n", "<leader>x", ":Bdelete<CR>", { silent = true })    -- Reiter schließen
 vim.keymap.set("n", "<leader>d", ":%d<CR>", {silent = true}) -- Reiterpuffer leeren
 
+vim.keymap.set('n', '<A-j>', ':m+1<CR>==', { silent = true, desc = 'Zeile runter' })
+vim.keymap.set('n', '<A-k>', ':m-2<CR>==', { silent = true, desc = 'Zeile hoch' })
+vim.keymap.set('v', '<A-j>', ":m '>+1<CR>gv=gv", { silent = true, desc = 'Auswahl runter' })
+vim.keymap.set('v', '<A-k>', ":m '<-2<CR>gv=gv", { silent = true, desc = 'Auswahl hoch' })
+
 vim.keymap.set('n', 'cd', ':NvimTreeChangeRootToNode<CR>') -- change current dir
 vim.keymap.set('t', '<Esc><Esc>', [[<C-\><C-n>]]) -- exit terminal german layout
+vim.keymap.set("n", "<leader>gs", "<cmd>G<CR><C-w>o", { desc = "Git status (fullscreen)" })
+
+vim.keymap.set("n", "<leader>H", ":BufferLineMovePrev<CR>", { silent = true, desc = "Buffer nach links" })
+vim.keymap.set("n", "<leader>L", ":BufferLineMoveNext<CR>", { silent = true, desc = "Buffer nach rechts" })
